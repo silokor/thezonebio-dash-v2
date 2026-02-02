@@ -214,10 +214,22 @@
     .inventory-item.critical { border-color: #ef4444; }
     .inventory-item.warning { border-color: #eab308; }
     .inv-name { font-size: 14px; color: #888; margin-bottom: 8px; }
-    .inv-count { font-size: 32px; font-weight: 600; }
+    .inv-count { font-size: 32px; font-weight: 600; cursor: pointer; }
+    .inv-count:hover { opacity: 0.8; }
     .inv-count.critical { color: #ef4444; }
     .inv-count.warning { color: #eab308; }
     .inv-count.ok { color: #22c55e; }
+    .inv-input { 
+      width: 80px; font-size: 28px; font-weight: 600; 
+      background: #222; border: 1px solid #444; border-radius: 6px;
+      color: #fff; text-align: center; padding: 4px;
+    }
+    .btn-refresh { 
+      background: transparent; border: 1px solid #333; 
+      padding: 8px 12px; border-radius: 8px; cursor: pointer;
+      color: #888; font-size: 13px; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-refresh:hover { background: #222; color: #fff; }
 
     @media (max-width: 1024px) {
       .summary-cards { grid-template-columns: repeat(2, 1fr); }
@@ -235,7 +247,15 @@
   <div class="container">
     <header>
       <h1>더존바이오 이커머스 대시보드</h1>
-      <div class="last-updated">마지막 업데이트: <span id="lastUpdate">-</span></div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <button class="btn-refresh" onclick="loadData()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+          </svg>
+          새로고침
+        </button>
+        <div class="last-updated">마지막 업데이트: <span id="lastUpdate">-</span></div>
+      </div>
     </header>
 
     <!-- Summary Cards -->
@@ -390,7 +410,7 @@
         updateDashboard(summary);
         renderTable();
         renderCharts();
-        renderInventory(summary.inventory);
+        loadInventory();
         
         document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR');
         console.log(`Loaded ${orders.length} orders from Supabase`);
@@ -451,7 +471,7 @@
         updateDashboard(summaryRes);
         renderTable();
         renderCharts();
-        renderInventory(summaryRes.inventory);
+        loadInventory();
         
         document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR') + ' (로컬)';
       } catch (err) {
@@ -658,23 +678,50 @@
       });
     }
 
-    function renderInventory(inventory) {
-      const items = [
-        { name: 'HOUSE', count: inventory.HOUSE || 0 },
-        { name: 'DECAF', count: inventory.DECAF || 0 },
-        { name: 'VIBRANT', count: inventory.VIBRANT || 0 },
-        { name: '1+1 EVENT', count: inventory['1+1_EVENT'] || 0 }
-      ];
+    async function loadInventory() {
+      try {
+        const { data, error } = await db.from('inventory').select('*').order('id');
+        if (error) throw error;
+        renderInventory(data);
+      } catch (err) {
+        console.error('Inventory load error:', err);
+      }
+    }
 
-      document.getElementById('inventoryGrid').innerHTML = items.map(item => {
-        const status = item.count === 0 ? 'critical' : item.count <= 5 ? 'warning' : 'ok';
+    function renderInventory(items) {
+      const displayOrder = ['HOUSE', 'DECAF', 'VIBRANT', 'MUSHROOM_CUP'];
+      const displayNames = { HOUSE: 'HOUSE', DECAF: 'DECAF', VIBRANT: 'VIBRANT', MUSHROOM_CUP: '버섯 컵' };
+      
+      const sortedItems = displayOrder.map(code => 
+        items.find(i => i.product_code === code) || { product_code: code, quantity: 0 }
+      );
+
+      document.getElementById('inventoryGrid').innerHTML = sortedItems.map(item => {
+        const status = item.quantity === 0 ? 'critical' : item.quantity <= 5 ? 'warning' : 'ok';
+        const name = displayNames[item.product_code] || item.product_code;
         return `
           <div class="inventory-item ${status}">
-            <div class="inv-name">${item.name}</div>
-            <div class="inv-count ${status}">${item.count}개</div>
+            <div class="inv-name">${name}</div>
+            <div class="inv-count ${status}" onclick="editInventory('${item.product_code}', ${item.quantity})">${item.quantity}개</div>
           </div>
         `;
       }).join('');
+    }
+
+    async function editInventory(code, currentQty) {
+      const newQty = prompt('새 수량 입력:', currentQty);
+      if (newQty === null) return;
+      const qty = parseInt(newQty, 10);
+      if (isNaN(qty) || qty < 0) { alert('올바른 숫자를 입력하세요.'); return; }
+      
+      try {
+        const { error } = await db.from('inventory').update({ quantity: qty }).eq('product_code', code);
+        if (error) throw error;
+        loadInventory();
+      } catch (err) {
+        console.error('Inventory update error:', err);
+        alert('수정 실패: ' + err.message);
+      }
     }
 
     // Init - ensure scripts are loaded
