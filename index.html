@@ -371,7 +371,9 @@
     // Supabase Configuration
     const SUPABASE_URL = 'https://cjttjcarpqwonxixtovk.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqdHRqY2FycHF3b254aXh0b3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMjQ3NDMsImV4cCI6MjA4NTYwMDc0M30.1Q0xTYEUUzRQj6oTPKVSK9_GKWVe0EbSdPtyEG_ErM4';
+    const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqdHRqY2FycHF3b254aXh0b3ZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDAyNDc0MywiZXhwIjoyMDg1NjAwNzQzfQ.PrrUHqrlZMOy0-p1vWOOJFVmkF0SPF_mFflTTLtz5Yc';
     const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const dbAdmin = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     async function loadData() {
       try {
@@ -715,8 +717,9 @@
       if (isNaN(qty) || qty < 0) { alert('올바른 숫자를 입력하세요.'); return; }
       
       try {
-        const { error } = await db.from('inventory').update({ quantity: qty }).eq('product_code', code);
+        const { error } = await dbAdmin.from('inventory').update({ quantity: qty }).eq('product_code', code);
         if (error) throw error;
+        alert('수정 완료!');
         loadInventory();
       } catch (err) {
         console.error('Inventory update error:', err);
