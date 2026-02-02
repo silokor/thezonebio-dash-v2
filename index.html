@@ -677,8 +677,11 @@
       }).join('');
     }
 
-    // Init
-    loadData();
+    // Init - wait for DOM and scripts to load
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, initializing dashboard...');
+      loadData();
+    });
   </script>
 </body>
 </html>
