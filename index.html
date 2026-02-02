@@ -677,11 +677,16 @@
       }).join('');
     }
 
-    // Init
-    (function init() {
-      console.log('Initializing dashboard...');
+    // Init - ensure scripts are loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM ready, initializing...');
+        loadData();
+      });
+    } else {
+      console.log('DOM already loaded, initializing...');
       loadData();
-    })();
+    }
   </script>
 </body>
 </html>
