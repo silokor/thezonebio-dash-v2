@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>더존바이오 이커머스 대시보드</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -81,8 +80,8 @@
       transition: all 0.2s;
     }
     .btn:hover { background: #333; }
-    .btn.primary { background: #3b82f6; border-color: #3b82f6; }
-    .btn.primary:hover { background: #2563eb; }
+    .btn.primary { background: #f97316; border-color: #f97316; }
+    .btn.primary:hover { background: #ea580c; }
 
     /* Chart Section */
     .chart-section {
@@ -214,22 +213,10 @@
     .inventory-item.critical { border-color: #ef4444; }
     .inventory-item.warning { border-color: #eab308; }
     .inv-name { font-size: 14px; color: #888; margin-bottom: 8px; }
-    .inv-count { font-size: 32px; font-weight: 600; cursor: pointer; }
-    .inv-count:hover { opacity: 0.8; }
+    .inv-count { font-size: 32px; font-weight: 600; }
     .inv-count.critical { color: #ef4444; }
     .inv-count.warning { color: #eab308; }
     .inv-count.ok { color: #22c55e; }
-    .inv-input { 
-      width: 80px; font-size: 28px; font-weight: 600; 
-      background: #222; border: 1px solid #444; border-radius: 6px;
-      color: #fff; text-align: center; padding: 4px;
-    }
-    .btn-refresh { 
-      background: transparent; border: 1px solid #333; 
-      padding: 8px 12px; border-radius: 8px; cursor: pointer;
-      color: #888; font-size: 13px; display: flex; align-items: center; gap: 6px;
-    }
-    .btn-refresh:hover { background: #222; color: #fff; }
 
     @media (max-width: 1024px) {
       .summary-cards { grid-template-columns: repeat(2, 1fr); }
@@ -237,49 +224,152 @@
       .inventory-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
-      .container { padding: 16px; }
-      header { flex-direction: column; gap: 12px; align-items: flex-start; }
-      h1 { font-size: 20px; }
-      .summary-cards { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .card { padding: 16px; }
-      .card-value { font-size: 22px; }
-      .filters { flex-direction: column; align-items: stretch; }
-      .filter-group { flex-wrap: wrap; }
-      input[type="date"], select { width: 100%; }
-      .btn { width: 100%; text-align: center; }
-      .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      table { min-width: 600px; }
-      th, td { padding: 10px 8px; font-size: 12px; white-space: nowrap; }
-      .inventory-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .inventory-item { padding: 16px; }
-      .inv-count { font-size: 24px; }
-      .chart-card { padding: 16px; }
-      .pagination button { padding: 8px 12px; font-size: 12px; }
-    }
-    @media (max-width: 400px) {
       .summary-cards { grid-template-columns: 1fr; }
-      .card-value { font-size: 20px; }
+      .inventory-grid { grid-template-columns: 1fr; }
+      th, td { padding: 12px; font-size: 12px; }
+    }
+
+    /* Login Modal */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .login-overlay.hidden { display: none; }
+    .login-box {
+      background: #151515;
+      border: 1px solid #333;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .login-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .login-subtitle {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .login-input {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .login-input:focus { outline: none; border-color: #3b82f6; }
+    .login-btn {
+      width: 100%;
+      background: #f97316;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .login-btn:hover { background: #ea580c; }
+    .header-login-btn {
+      background: #f9731620;
+      border: 1px solid #f9731640;
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: #f97316;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .header-login-btn:hover { background: #f97316; color: #fff; }
+    .login-error {
+      color: #ef4444;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 12px;
+      display: none;
+    }
+    .login-error.show { display: block; }
+    .guest-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .guest-link:hover { color: #888; }
+
+    /* Auth header */
+    .auth-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .user-badge {
+      font-size: 13px;
+      color: #4ade80;
+      background: #4ade8020;
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+    .logout-btn {
+      font-size: 13px;
+      color: #888;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .logout-btn:hover { color: #fff; }
+
+    /* Hidden data */
+    .hidden-data {
+      color: #444 !important;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
+  <!-- Login Modal -->
+  <div class="login-overlay hidden" id="loginOverlay">
+    <div class="login-box">
+      <div class="login-title">로그인</div>
+      <div class="login-subtitle">더존바이오 이커머스 대시보드</div>
+      <input type="text" class="login-input" id="loginId" placeholder="아이디">
+      <input type="password" class="login-input" id="loginPw" placeholder="비밀번호">
+      <button class="login-btn" onclick="doLogin()">로그인</button>
+      <div class="login-error" id="loginError">아이디 또는 비밀번호가 일치하지 않습니다</div>
+      <div class="guest-link" onclick="guestAccess()">닫기</div>
+    </div>
+  </div>
+
   <div class="container">
     <header>
       <h1>더존바이오 이커머스 대시보드</h1>
-      <div style="display:flex; align-items:center; gap:16px;">
-        <button class="btn-refresh" onclick="loadData()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-          </svg>
-          새로고침
-        </button>
+      <div class="auth-area">
         <div class="last-updated">마지막 업데이트: <span id="lastUpdate">-</span></div>
+        <button class="header-login-btn" id="headerLoginBtn" onclick="showLoginModal()">로그인</button>
+        <span class="user-badge" id="userBadge" style="display:none;">관리자</span>
+        <button class="logout-btn" id="logoutBtn" style="display:none;" onclick="doLogout()">로그아웃</button>
       </div>
     </header>
 
     <!-- Summary Cards -->
     <div class="summary-cards">
-      <div class="card">
+      <div class="card" id="revenueCard">
         <div class="card-label">총 매출</div>
         <div class="card-value" id="totalRevenue">-</div>
         <div class="card-sub" id="revenueChange">-</div>
@@ -289,13 +379,13 @@
         <div class="card-value" id="totalOrders">-</div>
         <div class="card-sub" id="orderChange">-</div>
       </div>
-      <div class="card">
+      <div class="card" id="avgCard">
         <div class="card-label">평균 객단가</div>
         <div class="card-value" id="avgOrderValue">-</div>
         <div class="card-sub">주문당 평균</div>
       </div>
       <div class="card">
-        <div class="card-label">미발송 주문</div>
+        <div class="card-label">미배송 주문</div>
         <div class="card-value" id="pendingOrders">-</div>
         <div class="card-sub" id="pendingAmount">-</div>
       </div>
@@ -340,7 +430,7 @@
           <canvas id="revenueChart"></canvas>
         </div>
       </div>
-      <div class="chart-card">
+      <div class="chart-card" id="channelChartCard">
         <div class="chart-title">채널별 매출</div>
         <div class="chart-container">
           <canvas id="channelChart"></canvas>
@@ -354,7 +444,6 @@
         <div class="table-title">주문 내역</div>
         <div class="order-count"><span id="filteredCount">0</span>건</div>
       </div>
-      <div class="table-container">
       <table>
         <thead>
           <tr>
@@ -370,7 +459,6 @@
         <tbody id="ordersTable">
         </tbody>
       </table>
-      </div>
       <div class="pagination" id="pagination"></div>
     </div>
 
@@ -382,6 +470,97 @@
   </div>
 
   <script>
+    // Auth
+    const ADMIN_ID = 'thezonebio';
+    const ADMIN_PW_HASH = 'a3f5b2c1d4e6'; // Simple hash check
+    let isLoggedIn = false;
+
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash).toString(16).slice(0, 12);
+    }
+
+    function checkAuth() {
+      const session = localStorage.getItem('tzb_session');
+      if (session === 'admin') {
+        isLoggedIn = true;
+        showLoggedInUI();
+      } else {
+        isLoggedIn = false;
+      }
+    }
+
+    function showLoginModal() {
+      document.getElementById('loginOverlay').classList.remove('hidden');
+    }
+
+    function hideLoginModal() {
+      document.getElementById('loginOverlay').classList.add('hidden');
+    }
+
+    function doLogin() {
+      const id = document.getElementById('loginId').value;
+      const pw = document.getElementById('loginPw').value;
+      
+      if (id === ADMIN_ID && pw === 'ejwhsqkdldh1!') {
+        localStorage.setItem('tzb_session', 'admin');
+        isLoggedIn = true;
+        hideLoginModal();
+        document.getElementById('loginError').classList.remove('show');
+        showLoggedInUI();
+        showRestrictedBlocks();
+        loadData();
+      } else {
+        document.getElementById('loginError').classList.add('show');
+      }
+    }
+
+    function guestAccess() {
+      hideLoginModal();
+    }
+
+    function doLogout() {
+      localStorage.removeItem('tzb_session');
+      location.reload();
+    }
+
+    function showLoggedInUI() {
+      document.getElementById('headerLoginBtn').style.display = 'none';
+      document.getElementById('userBadge').style.display = 'inline-block';
+      document.getElementById('logoutBtn').style.display = 'inline-block';
+    }
+
+    function applyGuestRestrictions() {
+      // 기간 제한: 최근 2주만
+      const today = new Date();
+      const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+      document.getElementById('startDate').value = twoWeeksAgo.toISOString().split('T')[0];
+      document.getElementById('startDate').min = twoWeeksAgo.toISOString().split('T')[0];
+      document.getElementById('endDate').value = today.toISOString().split('T')[0];
+    }
+
+    function hideRestrictedBlocks() {
+      if (!isLoggedIn) {
+        // 총 매출 카드 숨김
+        document.getElementById('revenueCard').style.display = 'none';
+        // 평균 객단가 카드 숨김
+        document.getElementById('avgCard').style.display = 'none';
+        // 채널별 매출 차트 숨김
+        document.getElementById('channelChartCard').style.display = 'none';
+      }
+    }
+
+    function showRestrictedBlocks() {
+      document.getElementById('revenueCard').style.display = 'block';
+      document.getElementById('avgCard').style.display = 'block';
+      document.getElementById('channelChartCard').style.display = 'block';
+    }
+
     // All orders data
     let allOrders = [];
     let filteredOrders = [];
@@ -389,62 +568,7 @@
     const pageSize = 20;
 
     // Load data
-    // Supabase Configuration
-    const SUPABASE_URL = 'https://cjttjcarpqwonxixtovk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqdHRqY2FycHF3b254aXh0b3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMjQ3NDMsImV4cCI6MjA4NTYwMDc0M30.1Q0xTYEUUzRQj6oTPKVSK9_GKWVe0EbSdPtyEG_ErM4';
-    const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqdHRqY2FycHF3b254aXh0b3ZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDAyNDc0MywiZXhwIjoyMDg1NjAwNzQzfQ.PrrUHqrlZMOy0-p1vWOOJFVmkF0SPF_mFflTTLtz5Yc';
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const dbAdmin = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
     async function loadData() {
-      try {
-        // Fetch orders from Supabase
-        const { data: orders, error } = await db
-          .from('orders')
-          .select('*')
-          .order('order_date', { ascending: false });
-
-        if (error) throw error;
-
-        // Transform Supabase data to dashboard format
-        allOrders = orders.map(o => ({
-          channel: o.channel,
-          orderId: o.order_id,
-          orderDate: o.order_date ? o.order_date.split('T')[0].split(' ')[0] : '',
-          orderTime: o.order_date || '',
-          customerName: o.customer_name,
-          productName: o.product_name,
-          amount: o.amount || 0,
-          status: o.status
-        }));
-
-        filteredOrders = [...allOrders];
-        
-        // Calculate summary from data
-        const summary = {
-          inventory: {
-            HOUSE: 5,
-            DECAF: 3,
-            VIBRANT: 0,
-            EVENT_1PLUS1: 0
-          }
-        };
-        
-        updateDashboard(summary);
-        renderTable();
-        renderCharts();
-        loadInventory();
-        
-        document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR');
-        console.log(`Loaded ${orders.length} orders from Supabase`);
-      } catch (err) {
-        console.error('Supabase load error:', err);
-        // Fallback to local JSON files
-        await loadLocalData();
-      }
-    }
-
-    async function loadLocalData() {
       try {
         const [cafe24Res, naverRes, coupangRes, summaryRes] = await Promise.all([
           fetch('data/cafe24/orders.json').then(r => r.json()),
@@ -453,6 +577,7 @@
           fetch('data/combined/summary.json').then(r => r.json())
         ]);
 
+        // Normalize Cafe24
         const cafe24Orders = (cafe24Res.orders || cafe24Res).map(o => ({
           channel: 'cafe24',
           orderId: o.orderId,
@@ -464,6 +589,7 @@
           status: normalizeStatus(o.status)
         }));
 
+        // Normalize Naver
         const naverOrders = naverRes.orders.map(o => ({
           channel: 'naver',
           orderId: o.orderId,
@@ -475,6 +601,7 @@
           status: normalizeStatus(o.status)
         }));
 
+        // Normalize Coupang
         const coupangOrders = coupangRes.orders.map(o => ({
           channel: 'coupang',
           orderId: o.orderId,
@@ -494,11 +621,12 @@
         updateDashboard(summaryRes);
         renderTable();
         renderCharts();
-        loadInventory();
+        renderInventory(summaryRes.inventory);
+        hideRestrictedBlocks();
         
-        document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR') + ' (로컬)';
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR');
       } catch (err) {
-        console.error('Local data load error:', err);
+        console.error('Data load error:', err);
       }
     }
 
@@ -516,7 +644,7 @@
     function updateDashboard(summary) {
       const validOrders = filteredOrders.filter(o => o.status !== 'cancelled' && o.amount > 0);
       const totalRevenue = validOrders.reduce((sum, o) => sum + o.amount, 0);
-      const pendingOrders = filteredOrders.filter(o => o.status === 'pending');
+      const pendingOrders = filteredOrders.filter(o => o.status === 'shipping' || o.status === 'pending');
       const pendingAmount = pendingOrders.reduce((sum, o) => sum + o.amount, 0);
 
       document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
@@ -533,6 +661,15 @@
       return '₩' + num.toLocaleString('ko-KR');
     }
 
+    function getOrderDetailUrl(channel, orderId) {
+      const urls = {
+        cafe24: `https://thezonebio.cafe24.com/admin/php/shop1/s_new/order_view.php?order_id=${orderId}`,
+        naver: `https://sell.smartstore.naver.com/o/v3/order-detail/${orderId}`,
+        coupang: `https://wing.coupang.com/vendor-inventory/order/management/delivery-detail?shipmentBoxId=${orderId}`
+      };
+      return urls[channel] || '#';
+    }
+
     function renderTable() {
       const start = (currentPage - 1) * pageSize;
       const end = start + pageSize;
@@ -542,7 +679,12 @@
       tbody.innerHTML = pageOrders.map(o => `
         <tr>
           <td><span class="channel-badge ${o.channel}">${o.channel.toUpperCase()}</span></td>
-          <td style="font-family:monospace;font-size:12px;">${o.orderId}</td>
+          <td style="font-family:monospace;font-size:12px;">
+            <a href="${getOrderDetailUrl(o.channel, o.orderId)}" target="_blank" 
+               style="color:#3b82f6;text-decoration:none;cursor:pointer;" 
+               onmouseover="this.style.textDecoration='underline'" 
+               onmouseout="this.style.textDecoration='none'">${o.orderId}</a>
+          </td>
           <td>${o.orderDate}</td>
           <td>${o.customerName}</td>
           <td class="product-name" title="${o.productName}">${o.productName}</td>
@@ -591,10 +733,21 @@
     }
 
     function applyFilters() {
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
+      let startDate = document.getElementById('startDate').value;
+      let endDate = document.getElementById('endDate').value;
       const channel = document.getElementById('channelFilter').value;
       const status = document.getElementById('statusFilter').value;
+
+      // 게스트는 최대 2주 제한
+      if (!isLoggedIn) {
+        const today = new Date();
+        const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+        const minDate = twoWeeksAgo.toISOString().split('T')[0];
+        if (startDate < minDate) {
+          startDate = minDate;
+          document.getElementById('startDate').value = minDate;
+        }
+      }
 
       filteredOrders = allOrders.filter(o => {
         const date = o.orderDate;
@@ -609,6 +762,7 @@
       updateDashboard({});
       renderTable();
       renderCharts();
+      hideRestrictedBlocks();
     }
 
     function resetFilters() {
@@ -675,19 +829,20 @@
       });
 
       // Channel chart
+      if (channelChart) channelChart.destroy();
+      
       const channelData = { cafe24: 0, naver: 0, coupang: 0 };
       filteredOrders.filter(o => o.status !== 'cancelled').forEach(o => {
         channelData[o.channel] += o.amount;
       });
 
-      if (channelChart) channelChart.destroy();
       channelChart = new Chart(document.getElementById('channelChart'), {
         type: 'doughnut',
         data: {
           labels: ['Cafe24', 'Naver', 'Coupang'],
           datasets: [{
             data: [channelData.cafe24, channelData.naver, channelData.coupang],
-            backgroundColor: ['#3b82f6', '#22c55e', '#f97316'],
+            backgroundColor: ['#f97316', '#22c55e', '#3b82f6'],
             borderWidth: 0
           }]
         },
@@ -701,63 +856,41 @@
       });
     }
 
-    async function loadInventory() {
-      try {
-        const { data, error } = await db.from('inventory').select('*').order('id');
-        if (error) throw error;
-        renderInventory(data);
-      } catch (err) {
-        console.error('Inventory load error:', err);
-      }
-    }
+    function renderInventory(inventory) {
+      const items = [
+        { name: 'HOUSE', count: inventory.HOUSE || 0 },
+        { name: 'DECAF', count: inventory.DECAF || 0 },
+        { name: 'VIBRANT', count: inventory.VIBRANT || 0 },
+        { name: '1+1 EVENT', count: inventory['1+1_EVENT'] || 0 }
+      ];
 
-    function renderInventory(items) {
-      const displayOrder = ['HOUSE', 'DECAF', 'VIBRANT', 'MUSHROOM_CUP'];
-      const displayNames = { HOUSE: 'HOUSE', DECAF: 'DECAF', VIBRANT: 'VIBRANT', MUSHROOM_CUP: '버섯 컵' };
-      
-      const sortedItems = displayOrder.map(code => 
-        items.find(i => i.product_code === code) || { product_code: code, quantity: 0 }
-      );
-
-      document.getElementById('inventoryGrid').innerHTML = sortedItems.map(item => {
-        const status = item.quantity === 0 ? 'critical' : item.quantity <= 5 ? 'warning' : 'ok';
-        const name = displayNames[item.product_code] || item.product_code;
+      document.getElementById('inventoryGrid').innerHTML = items.map(item => {
+        const status = item.count === 0 ? 'critical' : item.count <= 5 ? 'warning' : 'ok';
         return `
           <div class="inventory-item ${status}">
-            <div class="inv-name">${name}</div>
-            <div class="inv-count ${status}" onclick="editInventory('${item.product_code}', ${item.quantity})">${item.quantity}개</div>
+            <div class="inv-name">${item.name}</div>
+            <div class="inv-count ${status}">${item.count}개</div>
           </div>
         `;
       }).join('');
     }
 
-    async function editInventory(code, currentQty) {
-      const newQty = prompt('새 수량 입력:', currentQty);
-      if (newQty === null) return;
-      const qty = parseInt(newQty, 10);
-      if (isNaN(qty) || qty < 0) { alert('올바른 숫자를 입력하세요.'); return; }
-      
-      try {
-        const { error } = await dbAdmin.from('inventory').update({ quantity: qty }).eq('product_code', code);
-        if (error) throw error;
-        alert('수정 완료!');
-        loadInventory();
-      } catch (err) {
-        console.error('Inventory update error:', err);
-        alert('수정 실패: ' + err.message);
-      }
+    // Init
+    checkAuth();
+    if (!isLoggedIn) {
+      applyGuestRestrictions();
     }
+    loadData();
 
-    // Init - ensure scripts are loaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM ready, initializing...');
-        loadData();
-      });
-    } else {
-      console.log('DOM already loaded, initializing...');
-      loadData();
-    }
+    // Enter key login
+    document.getElementById('loginPw').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    // Close modal on overlay click
+    document.getElementById('loginOverlay').addEventListener('click', (e) => {
+      if (e.target.id === 'loginOverlay') hideLoginModal();
+    });
   </script>
 </body>
 </html>
