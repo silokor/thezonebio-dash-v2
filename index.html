@@ -165,6 +165,7 @@
     }
     .status-badge.completed { background: #22c55e20; color: #22c55e; }
     .status-badge.shipping { background: #3b82f620; color: #3b82f6; }
+    .status-badge.ready { background: #8b5cf620; color: #8b5cf6; }
     .status-badge.pending { background: #eab30820; color: #eab308; }
     .status-badge.cancelled { background: #ef444420; color: #ef4444; }
 
@@ -196,6 +197,7 @@
     .status-option:hover { background: #252525; }
     .status-option.completed { color: #22c55e; }
     .status-option.shipping { color: #3b82f6; }
+    .status-option.ready { color: #8b5cf6; }
     .status-option.pending { color: #eab308; }
     .status-option.cancelled { color: #ef4444; }
     .toast {
@@ -427,6 +429,7 @@
           <option value="all">전체</option>
           <option value="completed">배송완료</option>
           <option value="shipping">배송중</option>
+          <option value="ready">배송준비완료</option>
           <option value="pending">결제완료</option>
           <option value="cancelled">취소</option>
         </select>
@@ -455,7 +458,12 @@
     <div class="table-section">
       <div class="table-header">
         <div class="table-title">주문 내역 <span style="color:#666;font-size:12px;font-weight:normal;">(Google Sheets 연동)</span></div>
-        <div class="order-count"><span id="filteredCount">0</span>건</div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <button class="btn" onclick="downloadHanjinExcel()" style="background:#8b5cf6;border-color:#8b5cf6;">
+            📦 한진택배 엑셀 (<span id="readyCount">0</span>건)
+          </button>
+          <div class="order-count"><span id="filteredCount">0</span>건</div>
+        </div>
       </div>
       <div class="table-container">
       <table>
@@ -569,7 +577,9 @@
           address: row['주소'] || '',
           addressDetail: row['상세주소'] || '',
           deliveryMemo: row['배송메모'] || '',
-          note: row['비고'] || ''
+          note: row['비고'] || '',
+          phone: row['전화번호'] || '',
+          zipcode: row['우편번호'] || ''
         })).filter(o => o.orderId); // Filter out empty rows
 
         // Sort by date descending
@@ -596,11 +606,13 @@
       if (s === 'cancelled') return 'cancelled';
       if (s === 'completed') return 'completed';
       if (s === 'shipping') return 'shipping';
+      if (s === 'ready') return 'ready';
       if (s === 'pending') return 'pending';
       // 한글 상태값
       if (s.includes('취소')) return 'cancelled';
       if (s.includes('배송완료') || s.includes('구매확정')) return 'completed';
       if (s.includes('배송중')) return 'shipping';
+      if (s.includes('배송준비완료') || s.includes('배송준비')) return 'ready';
       if (s.includes('결제완료') || s.includes('발송대기') || s.includes('상품준비')) return 'pending';
       return 'pending';
     }
@@ -619,6 +631,10 @@
       document.getElementById('pendingOrders').textContent = pendingOrders.length + '건';
       document.getElementById('pendingAmount').textContent = formatCurrency(pendingAmount);
       document.getElementById('filteredCount').textContent = filteredOrders.length;
+      
+      // 배송준비완료 건수 (한진택배 버튼용)
+      const readyOrders = allOrders.filter(o => o.status === 'ready');
+      document.getElementById('readyCount').textContent = readyOrders.length;
     }
 
     function formatCurrency(num) {
@@ -658,6 +674,7 @@
             <span class="status-badge ${o.status} editable" onclick="showStatusDropdown(event, '${o.orderId}', '${o.status}')">${getStatusLabel(o.status)}</span>
             <div class="status-dropdown" id="dropdown-${o.orderId}">
               <div class="status-option pending" onclick="changeStatus('${o.orderId}', 'pending')">결제완료</div>
+              <div class="status-option ready" onclick="changeStatus('${o.orderId}', 'ready')">배송준비완료</div>
               <div class="status-option shipping" onclick="changeStatus('${o.orderId}', 'shipping')">배송중</div>
               <div class="status-option completed" onclick="changeStatus('${o.orderId}', 'completed')">배송완료</div>
               <div class="status-option cancelled" onclick="changeStatus('${o.orderId}', 'cancelled')">취소</div>
@@ -673,6 +690,7 @@
       const labels = {
         completed: '배송완료',
         shipping: '배송중',
+        ready: '배송준비완료',
         pending: '결제완료',
         cancelled: '취소'
       };
@@ -1021,6 +1039,54 @@
           window.open('https://docs.google.com/spreadsheets/d/1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s/edit#gid=1573325141', '_blank');
         });
       }
+    }
+
+    // 한진택배 엑셀 다운로드
+    function downloadHanjinExcel() {
+      const readyOrders = allOrders.filter(o => o.status === 'ready');
+      
+      if (readyOrders.length === 0) {
+        showToast('⚠ 배송준비완료 상태인 주문이 없습니다');
+        return;
+      }
+      
+      // 한진택배 양식 헤더 (간단 버전)
+      const headers = ['받는분', '전화번호', '우편번호', '주소', '품목명', '수량', '출고번호', '특기사항'];
+      
+      // 데이터 생성
+      const rows = readyOrders.map(o => [
+        o.customerName,
+        o.phone || '',
+        o.zipcode || '',
+        (o.address + ' ' + o.addressDetail).trim(),
+        o.productName + (o.option ? ` (${o.option})` : ''),
+        o.quantity,
+        o.orderId,
+        o.deliveryMemo || ''
+      ]);
+      
+      // 전화번호/우편번호 누락 체크
+      const missingInfo = readyOrders.filter(o => !o.phone || !o.zipcode);
+      if (missingInfo.length > 0) {
+        showToast(`⚠ ${missingInfo.length}건의 전화번호/우편번호 누락. 시트에서 입력 필요`);
+      }
+      
+      // CSV 생성 (한진택배 업로드용)
+      const BOM = '\uFEFF'; // Excel UTF-8 인식용
+      const csv = BOM + [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+      
+      // 다운로드
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `한진택배_${new Date().toISOString().split('T')[0]}_${readyOrders.length}건.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      showToast(`✓ ${readyOrders.length}건 한진택배 엑셀 다운로드 완료`);
     }
 
     // Init
