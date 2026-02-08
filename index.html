@@ -591,11 +591,17 @@
 
     function normalizeStatus(status) {
       if (!status) return 'pending';
-      const s = status.toLowerCase();
+      const s = status.toLowerCase().trim();
+      // 영문 상태값 (시트에서 직접 저장된 값)
+      if (s === 'cancelled') return 'cancelled';
+      if (s === 'completed') return 'completed';
+      if (s === 'shipping') return 'shipping';
+      if (s === 'pending') return 'pending';
+      // 한글 상태값
       if (s.includes('취소')) return 'cancelled';
       if (s.includes('배송완료') || s.includes('구매확정')) return 'completed';
       if (s.includes('배송중')) return 'shipping';
-      if (s.includes('결제완료')) return 'pending';
+      if (s.includes('결제완료') || s.includes('발송대기') || s.includes('상품준비')) return 'pending';
       return 'pending';
     }
 
