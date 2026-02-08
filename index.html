@@ -216,6 +216,61 @@
       to { transform: translateX(0); opacity: 1; }
     }
 
+    /* Inventory Section */
+    .inventory-section {
+      background: linear-gradient(145deg, #151515 0%, #0d0d0d 100%);
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .inventory-title { font-size: 16px; font-weight: 500; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .inventory-item {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      transition: border-color 0.2s;
+    }
+    .inventory-item:hover { border-color: #555; }
+    .inventory-item.low { border-color: #eab308; }
+    .inventory-item.out { border-color: #ef4444; }
+    .inventory-name { font-size: 13px; color: #888; margin-bottom: 8px; }
+    .inventory-qty { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    .inventory-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+    .inventory-status.normal { background: #22c55e20; color: #22c55e; }
+    .inventory-status.low { background: #eab30820; color: #eab308; }
+    .inventory-status.out { background: #ef444420; color: #ef4444; }
+    .inventory-edit {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .inventory-edit input {
+      width: 80px;
+      background: #252525;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 6px 10px;
+      color: #fff;
+      font-size: 14px;
+    }
+    .inventory-edit button {
+      background: #3b82f6;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .inventory-edit button:hover { background: #2563eb; }
+
     .amount { font-weight: 500; font-variant-numeric: tabular-nums; }
     .product-name { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .option-name { max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888; font-size: 12px; }
@@ -338,6 +393,17 @@
       </div>
     </div>
 
+    <!-- Inventory Section -->
+    <div class="inventory-section">
+      <div class="inventory-title">
+        <span>📦 재고 현황</span>
+        <a href="https://docs.google.com/spreadsheets/d/1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s/edit#gid=1573325141" target="_blank" class="sheets-link" style="font-size:12px;">시트에서 편집</a>
+      </div>
+      <div class="inventory-grid" id="inventoryGrid">
+        <div class="inventory-item"><div class="inventory-name">로딩 중...</div></div>
+      </div>
+    </div>
+
     <!-- Filters -->
     <div class="filters">
       <div class="filter-group">
@@ -420,6 +486,10 @@
   <script>
     // Google Sheets Configuration (웹에 게시된 URL)
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQhddyZcGEoD0k1HbSOorh3hCPWkJlRQXlZmJZllkqnuDyF0ReJI1s33eO-kCNu2e8EXq9lfjZaGx-Q/pub?output=csv';
+    const INVENTORY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQhddyZcGEoD0k1HbSOorh3hCPWkJlRQXlZmJZllkqnuDyF0ReJI1s33eO-kCNu2e8EXq9lfjZaGx-Q/pub?gid=1573325141&single=true&output=csv';
+    
+    // Apps Script Web App URL (배포 후 여기에 URL 입력)
+    const APPS_SCRIPT_URL = '';
 
     // Data
     let allOrders = [];
@@ -840,8 +910,94 @@
       }, 5000);
     }
 
+    // Inventory functions
+    let inventoryData = [];
+
+    async function loadInventory() {
+      try {
+        const response = await fetch(INVENTORY_CSV_URL);
+        const csv = await response.text();
+        const data = parseCSV(csv);
+        
+        inventoryData = data.map(row => ({
+          name: row['품목명'] || '',
+          quantity: parseInt(row['현재고']) || 0,
+          minStock: parseInt(row['최소재고']) || 0,
+          status: row['상태'] || '정상',
+          lastUpdate: row['마지막 업데이트'] || ''
+        })).filter(item => item.name);
+
+        renderInventory();
+      } catch (err) {
+        console.error('Inventory load error:', err);
+        document.getElementById('inventoryGrid').innerHTML = '<div class="inventory-item"><div class="inventory-name">재고 로드 실패</div></div>';
+      }
+    }
+
+    function renderInventory() {
+      const grid = document.getElementById('inventoryGrid');
+      
+      if (inventoryData.length === 0) {
+        grid.innerHTML = '<div class="inventory-item"><div class="inventory-name">재고 데이터 없음</div></div>';
+        return;
+      }
+
+      grid.innerHTML = inventoryData.map(item => {
+        const statusClass = item.quantity <= 0 ? 'out' : item.quantity <= item.minStock ? 'low' : '';
+        const statusLabel = item.quantity <= 0 ? '품절' : item.quantity <= item.minStock ? '부족' : '정상';
+        const statusBadgeClass = item.quantity <= 0 ? 'out' : item.quantity <= item.minStock ? 'low' : 'normal';
+        
+        return `
+          <div class="inventory-item ${statusClass}">
+            <div class="inventory-name">${item.name}</div>
+            <div class="inventory-qty">${item.quantity}</div>
+            <span class="inventory-status ${statusBadgeClass}">${statusLabel}</span>
+            <div class="inventory-edit">
+              <input type="number" id="inv-${item.name.replace(/[^a-zA-Z0-9]/g, '')}" value="${item.quantity}" min="0">
+              <button onclick="updateInventoryItem('${item.name}')">저장</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function updateInventoryItem(itemName) {
+      const inputId = `inv-${itemName.replace(/[^a-zA-Z0-9]/g, '')}`;
+      const input = document.getElementById(inputId);
+      const newQty = parseInt(input.value) || 0;
+      
+      // 로컬 데이터 업데이트
+      const item = inventoryData.find(i => i.name === itemName);
+      if (item) {
+        item.quantity = newQty;
+        item.status = newQty <= 0 ? '품절' : newQty <= item.minStock ? '부족' : '정상';
+      }
+      
+      renderInventory();
+      
+      // Apps Script로 시트 업데이트 시도
+      if (APPS_SCRIPT_URL) {
+        try {
+          await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'updateInventory', item: itemName, quantity: newQty })
+          });
+          showToast(`${itemName} 재고가 ${newQty}개로 업데이트됨`);
+        } catch (err) {
+          showToast(`로컬 업데이트 완료. 시트 반영: `, () => {
+            window.open('https://docs.google.com/spreadsheets/d/1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s/edit#gid=1573325141', '_blank');
+          });
+        }
+      } else {
+        showToast(`${itemName} 재고 ${newQty}개. 시트 반영 클릭 →`, () => {
+          window.open('https://docs.google.com/spreadsheets/d/1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s/edit#gid=1573325141', '_blank');
+        });
+      }
+    }
+
     // Init
     loadData();
+    loadInventory();
   </script>
 </body>
 </html>
