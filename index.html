@@ -943,9 +943,9 @@
       }
 
       grid.innerHTML = inventoryData.map(item => {
-        const statusClass = item.quantity <= 0 ? 'out' : item.quantity <= item.minStock ? 'low' : '';
-        const statusLabel = item.quantity <= 0 ? '품절' : item.quantity <= item.minStock ? '부족' : '정상';
-        const statusBadgeClass = item.quantity <= 0 ? 'out' : item.quantity <= item.minStock ? 'low' : 'normal';
+        const statusClass = item.quantity <= 0 ? 'out' : item.quantity <= 3 ? 'low' : '';
+        const statusLabel = item.quantity <= 0 ? '품절' : item.quantity <= 3 ? '부족' : '정상';
+        const statusBadgeClass = item.quantity <= 0 ? 'out' : item.quantity <= 3 ? 'low' : 'normal';
         
         return `
           <div class="inventory-item ${statusClass}">
@@ -970,7 +970,7 @@
       const item = inventoryData.find(i => i.name === itemName);
       if (item) {
         item.quantity = newQty;
-        item.status = newQty <= 0 ? '품절' : newQty <= item.minStock ? '부족' : '정상';
+        item.status = newQty <= 0 ? '품절' : newQty <= 3 ? '부족' : '정상';
       }
       
       renderInventory();
