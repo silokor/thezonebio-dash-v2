@@ -169,7 +169,10 @@
     .status-badge.cancelled { background: #ef444420; color: #ef4444; }
 
     .amount { font-weight: 500; font-variant-numeric: tabular-nums; }
-    .product-name { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-name { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .option-name { max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888; font-size: 12px; }
+    .address-cell { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+    .memo-cell { max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; color: #f59e0b; }
     
     .order-link {
       color: #60a5fa;
@@ -231,7 +234,7 @@
       input[type="date"], select { width: 100%; }
       .btn { width: 100%; text-align: center; }
       .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      table { min-width: 600px; }
+      table { min-width: 1000px; }
       th, td { padding: 10px 8px; font-size: 12px; white-space: nowrap; }
       .chart-card { padding: 16px; }
       .pagination button { padding: 8px 12px; font-size: 12px; }
@@ -349,13 +352,16 @@
             <th>주문일시</th>
             <th>고객명</th>
             <th>상품</th>
+            <th>옵션</th>
             <th>수량</th>
             <th>금액</th>
+            <th>주소</th>
+            <th>배송메모</th>
             <th>상태</th>
           </tr>
         </thead>
         <tbody id="ordersTable">
-          <tr><td colspan="8" class="loading">데이터 로딩 중...</td></tr>
+          <tr><td colspan="11" class="loading">데이터 로딩 중...</td></tr>
         </tbody>
       </table>
       </div>
@@ -422,7 +428,7 @@
     // Load data from Google Sheets
     async function loadData() {
       try {
-        document.getElementById('ordersTable').innerHTML = '<tr><td colspan="8" class="loading">데이터 로딩 중...</td></tr>';
+        document.getElementById('ordersTable').innerHTML = '<tr><td colspan="11" class="loading">데이터 로딩 중...</td></tr>';
         
         const response = await fetch(SHEET_CSV_URL);
         const csv = await response.text();
@@ -436,11 +442,15 @@
           orderTime: row['주문일시'] || '',
           customerName: row['고객명'] || '',
           productName: row['상품명'] || '',
+          option: row['옵션'] || '',
           quantity: parseInt(row['수량']) || 1,
           amount: parseInt(row['금액']) || 0,
           status: normalizeStatus(row['배송상태']),
           courier: row['택배사'] || '',
           trackingNumber: row['운송장번호'] || '',
+          address: row['주소'] || '',
+          addressDetail: row['상세주소'] || '',
+          deliveryMemo: row['배송메모'] || '',
           note: row['비고'] || ''
         })).filter(o => o.orderId); // Filter out empty rows
 
@@ -457,7 +467,7 @@
         console.log(`Loaded ${allOrders.length} orders from Google Sheets`);
       } catch (err) {
         console.error('Load error:', err);
-        document.getElementById('ordersTable').innerHTML = `<tr><td colspan="8" class="loading" style="color:#ef4444;">데이터 로드 실패: ${err.message}</td></tr>`;
+        document.getElementById('ordersTable').innerHTML = `<tr><td colspan="11" class="loading" style="color:#ef4444;">데이터 로드 실패: ${err.message}</td></tr>`;
       }
     }
 
@@ -499,11 +509,13 @@
       const tbody = document.getElementById('ordersTable');
       
       if (pageOrders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="loading">데이터가 없습니다</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="loading">데이터가 없습니다</td></tr>';
         return;
       }
 
-      tbody.innerHTML = pageOrders.map(o => `
+      tbody.innerHTML = pageOrders.map(o => {
+        const fullAddress = [o.address, o.addressDetail].filter(Boolean).join(' ');
+        return `
         <tr>
           <td><span class="channel-badge ${o.channel}">${o.channel.toUpperCase()}</span></td>
           <td style="font-family:monospace;font-size:12px;">
@@ -512,11 +524,14 @@
           <td>${formatDateTime(o.orderTime)}</td>
           <td>${o.customerName}</td>
           <td class="product-name" title="${o.productName}">${o.productName}</td>
+          <td class="option-name" title="${o.option}">${o.option || '-'}</td>
           <td>${o.quantity}</td>
           <td class="amount">${formatCurrency(o.amount)}</td>
+          <td class="address-cell" title="${fullAddress}">${fullAddress || '-'}</td>
+          <td class="memo-cell" title="${o.deliveryMemo}">${o.deliveryMemo || '-'}</td>
           <td><span class="status-badge ${o.status}">${getStatusLabel(o.status)}</span></td>
         </tr>
-      `).join('');
+      `}).join('');
 
       renderPagination();
     }
