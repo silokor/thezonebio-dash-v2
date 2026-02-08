@@ -170,6 +170,16 @@
 
     .amount { font-weight: 500; font-variant-numeric: tabular-nums; }
     .product-name { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .order-link {
+      color: #60a5fa;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .order-link:hover {
+      color: #93c5fd;
+      text-decoration: underline;
+    }
 
     /* Pagination */
     .pagination {
@@ -496,8 +506,10 @@
       tbody.innerHTML = pageOrders.map(o => `
         <tr>
           <td><span class="channel-badge ${o.channel}">${o.channel.toUpperCase()}</span></td>
-          <td style="font-family:monospace;font-size:12px;">${o.orderId}</td>
-          <td>${o.orderDate}</td>
+          <td style="font-family:monospace;font-size:12px;">
+            <a href="${getOrderDetailUrl(o.channel, o.orderId)}" target="_blank" class="order-link">${o.orderId}</a>
+          </td>
+          <td>${formatDateTime(o.orderTime)}</td>
           <td>${o.customerName}</td>
           <td class="product-name" title="${o.productName}">${o.productName}</td>
           <td>${o.quantity}</td>
@@ -517,6 +529,31 @@
         cancelled: '취소'
       };
       return labels[status] || status;
+    }
+
+    function getOrderDetailUrl(channel, orderId) {
+      switch(channel) {
+        case 'cafe24':
+          return `https://thezonebio.cafe24.com/admin/php/shop1/s_new/order_detail.php?order_id=${orderId}`;
+        case 'naver':
+          return `https://sell.smartstore.naver.com/#/naverpay/manage/order?productOrderId=${orderId}`;
+        case 'coupang':
+          return `https://wing.coupang.com/tenants/sfl-portal/order/info?shipmentBoxId=${orderId}`;
+        default:
+          return '#';
+      }
+    }
+
+    function formatDateTime(dateTime) {
+      if (!dateTime) return '-';
+      // Handle "YYYY-MM-DD HH:MM:SS" format
+      const parts = dateTime.split(' ');
+      if (parts.length >= 2) {
+        const date = parts[0];
+        const time = parts[1].substring(0, 5); // HH:MM
+        return `${date} ${time}`;
+      }
+      return dateTime;
     }
 
     function renderPagination() {
