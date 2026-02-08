@@ -1,0 +1,57 @@
+[
+  {
+    "channel": "CAFE24",
+    "order_id": "20260123-0000048",
+    "order_date": "2026-01-23T16:58:11+09:00",
+    "customer": "Sam Kim",
+    "product": "LOCK IN COFFEE::VIBRANT, LOCK IN COFFEE::HOUSE, LO",
+    "option": "-",
+    "quantity": 4,
+    "amount": 207000,
+    "status": "결제완료"
+  },
+  {
+    "channel": "CAFE24",
+    "order_id": "20260114-0000012",
+    "order_date": "2026-01-14T21:22:33+09:00",
+    "customer": "정소영",
+    "product": "[1+1 EVENT] LOCK IN COFFEE",
+    "option": "TASTE=HOUSE - 카페인, TASTE 2=DEC",
+    "quantity": 1,
+    "amount": 69900,
+    "status": "결제완료"
+  },
+  {
+    "channel": "CAFE24",
+    "order_id": "20260109-0000055",
+    "order_date": "2026-01-09T23:20:23+09:00",
+    "customer": "이호중",
+    "product": "[1+1 EVENT] LOCK IN COFFEE",
+    "option": "TASTE=DECAF - 시그니처, TASTE 2=DE",
+    "quantity": 1,
+    "amount": 66900,
+    "status": "결제완료"
+  },
+  {
+    "channel": "CAFE24",
+    "order_id": "20260109-0000023",
+    "order_date": "2026-01-09T14:11:42+09:00",
+    "customer": "유한나",
+    "product": "[1+1 EVENT] LOCK IN COFFEE",
+    "option": "TASTE=DECAF - 시그니처, TASTE 2=DE",
+    "quantity": 1,
+    "amount": 69900,
+    "status": "결제완료"
+  },
+  {
+    "channel": "CAFE24",
+    "order_id": "20260109-0000014",
+    "order_date": "2026-01-09T14:00:36+09:00",
+    "customer": "유한나",
+    "product": "LOCK IN COFFEE::DECAF",
+    "option": "-",
+    "quantity": 1,
+    "amount": 0,
+    "status": "취소"
+  }
+]
