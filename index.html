@@ -183,14 +183,12 @@
     .status-badge.editable { cursor: pointer; }
     .status-badge.editable:hover { filter: brightness(1.2); }
     .status-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
+      position: fixed;
       background: #1a1a1a;
       border: 1px solid #333;
       border-radius: 8px;
       padding: 4px;
-      z-index: 100;
+      z-index: 9999;
       min-width: 120px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       display: none;
@@ -921,6 +919,9 @@
       }
       
       const dropdown = document.getElementById(`dropdown-${orderId}`);
+      const rect = event.target.getBoundingClientRect();
+      dropdown.style.top = `${rect.bottom + 4}px`;
+      dropdown.style.left = `${rect.left}px`;
       dropdown.classList.add('show');
       activeDropdown = dropdown;
     }
