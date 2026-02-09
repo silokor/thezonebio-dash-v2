@@ -126,10 +126,14 @@
     .table-title { font-size: 16px; font-weight: 500; }
     .order-count { color: #888; font-size: 14px; }
     
-    table { width: 100%; border-collapse: collapse; }
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 1400px; }
     th {
       text-align: left;
-      padding: 14px 20px;
+      padding: 14px 16px;
       font-size: 12px;
       font-weight: 500;
       color: #666;
@@ -137,11 +141,16 @@
       letter-spacing: 0.5px;
       background: #0d0d0d;
       border-bottom: 1px solid #222;
+      white-space: nowrap;
     }
     td {
-      padding: 16px 20px;
-      font-size: 14px;
+      padding: 14px 16px;
+      font-size: 13px;
       border-bottom: 1px solid #1a1a1a;
+      white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     tr:hover td { background: #151515; }
     
@@ -473,6 +482,7 @@
             <th>주문번호</th>
             <th>주문일시</th>
             <th>고객명</th>
+            <th>전화번호</th>
             <th>상품</th>
             <th>옵션</th>
             <th>수량</th>
@@ -483,7 +493,7 @@
           </tr>
         </thead>
         <tbody id="ordersTable">
-          <tr><td colspan="11" class="loading">데이터 로딩 중...</td></tr>
+          <tr><td colspan="12" class="loading">데이터 로딩 중...</td></tr>
         </tbody>
       </table>
       </div>
@@ -554,7 +564,7 @@
     // Load data from Google Sheets
     async function loadData() {
       try {
-        document.getElementById('ordersTable').innerHTML = '<tr><td colspan="11" class="loading">데이터 로딩 중...</td></tr>';
+        document.getElementById('ordersTable').innerHTML = '<tr><td colspan="12" class="loading">데이터 로딩 중...</td></tr>';
         
         const response = await fetch(SHEET_CSV_URL);
         const csv = await response.text();
@@ -595,7 +605,7 @@
         console.log(`Loaded ${allOrders.length} orders from Google Sheets`);
       } catch (err) {
         console.error('Load error:', err);
-        document.getElementById('ordersTable').innerHTML = `<tr><td colspan="11" class="loading" style="color:#ef4444;">데이터 로드 실패: ${err.message}</td></tr>`;
+        document.getElementById('ordersTable').innerHTML = `<tr><td colspan="12" class="loading" style="color:#ef4444;">데이터 로드 실패: ${err.message}</td></tr>`;
       }
     }
 
@@ -649,7 +659,7 @@
       const tbody = document.getElementById('ordersTable');
       
       if (pageOrders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="loading">데이터가 없습니다</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="loading">데이터가 없습니다</td></tr>';
         return;
       }
 
@@ -659,13 +669,14 @@
         return `
         <tr data-order-id="${o.orderId}" data-row-index="${rowIndex}">
           <td><span class="channel-badge ${o.channel}">${o.channel.toUpperCase()}</span></td>
-          <td style="font-family:monospace;font-size:12px;">
+          <td style="font-family:monospace;font-size:11px;">
             <a href="${getOrderDetailUrl(o.channel, o.orderId)}" target="_blank" class="order-link">${o.orderId}</a>
           </td>
           <td>${formatDateTime(o.orderTime)}</td>
           <td>${o.customerName}</td>
-          <td class="product-name" title="${o.productName}">${o.productName}</td>
-          <td class="option-name" title="${o.option}">${o.option || '-'}</td>
+          <td style="font-family:monospace;font-size:12px;">${o.phone || '-'}</td>
+          <td class="product-name" title="${o.productName}">${formatProductName(o.productName)}</td>
+          <td class="option-name" title="${o.option}">${formatOption(o.option)}</td>
           <td>${o.quantity}</td>
           <td class="amount">${formatCurrency(o.amount)}</td>
           <td class="address-cell" title="${fullAddress}">${fullAddress || '-'}</td>
@@ -695,6 +706,38 @@
         cancelled: '취소'
       };
       return labels[status] || status;
+    }
+
+    // 상품명 포맷 (맛별 표시)
+    function formatProductName(name) {
+      if (!name) return '-';
+      // LOCK IN COFFEE::VIBRANT → VIBRANT
+      // [1+1 EVENT] LOCK IN COFFEE → 1+1 EVENT
+      let display = name
+        .replace(/LOCK IN COFFEE::/g, '')
+        .replace(/\[1\+1 EVENT\] LOCK IN COFFEE.*/, '1+1 EVENT')
+        .replace(/LOCK IN COFFEE/g, '')
+        .trim();
+      return display || name.substring(0, 30);
+    }
+
+    // 옵션 포맷 (맛별 수량)
+    function formatOption(opt) {
+      if (!opt || opt === '-') return '-';
+      // TASTE=DECAF - 시그니처, TASTE 2=HOUSE - 카페인 → DECAF x1, HOUSE x1
+      // LOCK IN COFFEE::VIBRANT x2 → VIBRANT x2
+      let display = opt
+        .replace(/LOCK IN COFFEE::/g, '')
+        .replace(/TASTE\s*\d*=/g, '')
+        .replace(/ - 시그니처/g, '')
+        .replace(/ - 카페인/g, '')
+        .replace(/ - 산미/g, '')
+        .trim();
+      // 축약
+      if (display.length > 40) {
+        display = display.substring(0, 37) + '...';
+      }
+      return display || '-';
     }
 
     function getOrderDetailUrl(channel, orderId) {
