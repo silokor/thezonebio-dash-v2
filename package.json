@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "ws": "^8.19.0"
+    "bcryptjs": "^2.4.3"
   }
 }
