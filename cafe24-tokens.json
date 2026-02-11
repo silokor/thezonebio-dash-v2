@@ -1,7 +1,9 @@
 {
-  "access_token": "YT2SodhvN1PpLh2Fet7evJ",
-  "refresh_token": "dfLCy8cOSa2PJIzz5I1ZFD",
-  "expires_at": "2026-02-11T01:13:25.000",
-  "refresh_token_expires_at": "2026-02-24T23:13:25.000",
-  "mall_id": "thezonebio"
+  "access_token": "2J2dQwhpNdmo3BBHm2zZOB",
+  "refresh_token": "9etxA66tay8XHDor3qfmDF",
+  "expires_at": "2026-02-11T17:04:30.000",
+  "refresh_token_expires_at": "2026-02-25T15:04:30.000",
+  "mall_id": "thezonebio",
+  "client_id": "WnsgQ0XnLZdiCCRf6cZrVG",
+  "client_secret": "CmqyTtIgJ9WqKP1iAm2blA"
 }
