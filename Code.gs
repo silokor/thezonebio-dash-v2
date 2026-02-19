@@ -28,12 +28,16 @@ function processRequest(data) {
       }
     }
     
-    // 컬럼 순서: 채널, 주문번호, 주문일시, 고객명, 상품명, 옵션, 수량, 금액, 배송상태, 택배사, 운송장번호, 주소, 상세주소, 배송메모, 비고, 전화번호, 우편번호
+    // 컬럼 순서: 채널, 주문번호, 주문일시, 고객명, 전화번호, 우편번호, 주소, 상세주소, 상품명, 옵션, 수량, 금액, 배송상태, 택배사, 운송장번호, 배송메모, 비고
     const row = [
       data.channel || '',
       data.orderId || '',
       data.orderDate || '',
       data.customerName || '',
+      data.phone || '',
+      data.zipcode || '',
+      data.address || '',
+      data.addressDetail || '',
       data.productName || '',
       data.option || '',
       data.quantity || '',
@@ -41,12 +45,8 @@ function processRequest(data) {
       data.status || '결제완료',
       data.courier || '',
       data.trackingNumber || '',
-      data.address || '',
-      data.addressDetail || '',
       data.deliveryMemo || '',
-      data.note || '',
-      data.phone || '',
-      data.zipcode || ''
+      data.note || ''
     ];
     
     sheet.appendRow(row);
@@ -61,7 +61,7 @@ function processRequest(data) {
     const values = sheet.getDataRange().getValues();
     for (let i = 1; i < values.length; i++) {
       if (String(values[i][1]) === String(data.orderId)) {
-        sheet.getRange(i + 1, 9).setValue(data.status);
+        sheet.getRange(i + 1, 13).setValue(data.status);
         return ContentService.createTextOutput(JSON.stringify({success: true, orderId: data.orderId, status: data.status})).setMimeType(ContentService.MimeType.JSON);
       }
     }
