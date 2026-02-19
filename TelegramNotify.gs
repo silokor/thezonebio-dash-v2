@@ -20,7 +20,7 @@ function checkAndNotify() {
     return;
   }
   
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('시트1');
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('Sheet1');
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
   

@@ -18,7 +18,7 @@ function processRequest(data) {
   // append: 새 주문 추가
   // ─────────────────────────────────────────────
   if (data.action === 'append') {
-    const sheet = ss.getSheetByName('시트1');
+    const sheet = ss.getSheetByName('Sheet1');
     const values = sheet.getDataRange().getValues();
     
     // 중복 체크 (주문번호 기준)
@@ -57,7 +57,7 @@ function processRequest(data) {
   // updateStatus: 배송상태 업데이트
   // ─────────────────────────────────────────────
   if (data.action === 'updateStatus') {
-    const sheet = ss.getSheetByName('시트1');
+    const sheet = ss.getSheetByName('Sheet1');
     const values = sheet.getDataRange().getValues();
     for (let i = 1; i < values.length; i++) {
       if (String(values[i][1]) === String(data.orderId)) {
