@@ -362,7 +362,7 @@
     <header>
       <h1>더존바이오 이커머스 대시보드</h1>
       <div class="header-right">
-        <a href="https://docs.google.com/spreadsheets/d/1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s/edit" target="_blank" class="sheets-link">
+        <a href="https://docs.google.com/spreadsheets/d/12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I/edit" target="_blank" class="sheets-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/>
           </svg>
@@ -406,7 +406,7 @@
     <div class="inventory-section">
       <div class="inventory-title">
         <span>📦 재고 현황</span>
-        <a href="https://docs.google.com/spreadsheets/d/1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s/edit#gid=1573325141" target="_blank" class="sheets-link" style="font-size:12px;">시트에서 편집</a>
+        <a href="https://docs.google.com/spreadsheets/d/12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I/edit#gid=1573325141" target="_blank" class="sheets-link" style="font-size:12px;">시트에서 편집</a>
       </div>
       <div class="inventory-grid" id="inventoryGrid">
         <div class="inventory-item"><div class="inventory-name">로딩 중...</div></div>
@@ -501,8 +501,8 @@
 
   <script>
     // Google Sheets Configuration (웹에 게시된 URL)
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQhddyZcGEoD0k1HbSOorh3hCPWkJlRQXlZmJZllkqnuDyF0ReJI1s33eO-kCNu2e8EXq9lfjZaGx-Q/pub?output=csv';
-    const INVENTORY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQhddyZcGEoD0k1HbSOorh3hCPWkJlRQXlZmJZllkqnuDyF0ReJI1s33eO-kCNu2e8EXq9lfjZaGx-Q/pub?gid=1573325141&single=true&output=csv';
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I/export?format=csv&gid=0';
+    const INVENTORY_CSV_URL = 'https://docs.google.com/spreadsheets/d/12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I/export?format=csv&gid=0'; // TODO: 재고 시트 추가 시 gid 변경
     
     // Apps Script Web App URL (배포 후 여기에 URL 입력)
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgHc3cas4qpK8QjRmqz4AcjqiZ-ifZAB39jqbHibGqeUfDsSL3AdwRXp4VWSh-vb4s/exec';
@@ -1075,12 +1075,12 @@
           }
         } catch (err) {
           showToast(`로컬 업데이트 완료. 시트 반영 실패`, () => {
-            window.open('https://docs.google.com/spreadsheets/d/1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s/edit#gid=1573325141', '_blank');
+            window.open('https://docs.google.com/spreadsheets/d/12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I/edit#gid=1573325141', '_blank');
           });
         }
       } else {
         showToast(`${itemName} 재고 ${newQty}개. 시트 반영 클릭 →`, () => {
-          window.open('https://docs.google.com/spreadsheets/d/1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s/edit#gid=1573325141', '_blank');
+          window.open('https://docs.google.com/spreadsheets/d/12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I/edit#gid=1573325141', '_blank');
         });
       }
     }

@@ -11,7 +11,7 @@ const CONFIG = {
   host: 'api-gateway.coupang.com'
 };
 
-const SHEET_ID = '1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s';
+const SHEET_ID = '12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I';
 
 // Generate datetime in Coupang format
 function getCoupangDatetime() {

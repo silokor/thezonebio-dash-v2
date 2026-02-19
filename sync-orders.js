@@ -22,7 +22,7 @@ const COUPANG_CONFIG = {
 };
 
 // Google Sheets 설정
-const SHEET_ID = '1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s';
+const SHEET_ID = '12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I';
 
 // ============ HMAC 서명 생성 (쿠팡 공식 형식) ============
 function generateHmacSignature(method, path, datetime) {

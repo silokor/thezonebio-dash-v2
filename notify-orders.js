@@ -16,7 +16,7 @@ const path = require('path');
 const TELEGRAM_BOT_TOKEN = '8241882418:AAE2fUgMBghj90Xyp_l9xRVxjFxv-XonFpE';
 const TELEGRAM_CHAT_ID = '7210253956';
 const DASHBOARD_URL = 'https://thezonebio-dash-v2.vercel.app/';
-const SHEET_ID = '1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s';
+const SHEET_ID = '12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I';
 
 const SCRIPTS = {
   cafe24: path.join(__dirname, 'sync-cafe24.js'),
