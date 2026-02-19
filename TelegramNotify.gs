@@ -3,7 +3,7 @@
 
 const TELEGRAM_TOKEN = '8241882418:AAE2fUgMBghj90Xyp_l9xRVxjFxv-XonFpE';
 const CHAT_ID = '-1003811535076';
-const SHEET_ID = '1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s';
+const SHEET_ID = '12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I';
 
 // 야간 시간 설정 (알림 안 보내는 시간)
 const QUIET_START = 21; // 오후 9시

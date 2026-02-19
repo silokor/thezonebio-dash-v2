@@ -4,7 +4,7 @@
  */
 
 const CONFIG = {
-  SHEET_ID: '1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s',
+  SHEET_ID: '12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I',
   SHEET_NAME: '시트1',
   COUPANG: {
     ACCESS_KEY: '5ef5dee7-6ea8-4fd5-b163-d0a3a07898b6',

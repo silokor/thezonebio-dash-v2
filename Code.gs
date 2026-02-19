@@ -12,7 +12,7 @@ function doGet(e) {
 }
 
 function processRequest(data) {
-  const ss = SpreadsheetApp.openById('1Uu9Tv1L6TfxHgW44v3hvB1_yz-HHYcMINP_Jhdi9G6s');
+  const ss = SpreadsheetApp.openById('12whpVCNHRvOwQWXotAs6CzRWbQVT44JhD95kSo3je0I');
   
   // ─────────────────────────────────────────────
   // append: 새 주문 추가
