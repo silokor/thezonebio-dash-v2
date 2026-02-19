@@ -426,8 +426,8 @@
         <select id="channelFilter">
           <option value="all">전체</option>
           <option value="cafe24">Cafe24</option>
-          <option value="naver">Naver</option>
-          <option value="coupang">Coupang</option>
+          <option value="naver">스마트스토어</option>
+          <option value="coupang">쿠팡</option>
         </select>
       </div>
       <div class="filter-group">
@@ -568,9 +568,18 @@
         const csv = await response.text();
         const data = parseCSV(csv);
         
+        // Normalize channel name
+        function normalizeChannel(ch) {
+          const c = (ch || '').toLowerCase();
+          if (c.includes('스마트스토어') || c.includes('naver') || c.includes('네이버')) return 'naver';
+          if (c.includes('cafe24') || c.includes('카페24')) return 'cafe24';
+          if (c.includes('coupang') || c.includes('쿠팡')) return 'coupang';
+          return c;
+        }
+
         // Transform to dashboard format
         allOrders = data.map(row => ({
-          channel: (row['채널'] || '').toLowerCase(),
+          channel: normalizeChannel(row['채널']),
           orderId: row['주문번호'] || '',
           orderDate: (row['주문일시'] || '').split(' ')[0],
           orderTime: row['주문일시'] || '',
@@ -666,7 +675,7 @@
         const rowIndex = (currentPage - 1) * pageSize + idx + 2; // +2 for header row
         return `
         <tr data-order-id="${o.orderId}" data-row-index="${rowIndex}">
-          <td><span class="channel-badge ${o.channel}">${o.channel.toUpperCase()}</span></td>
+          <td><span class="channel-badge ${o.channel}">${getChannelDisplayName(o.channel)}</span></td>
           <td style="font-family:monospace;font-size:11px;">
             <a href="${getOrderDetailUrl(o.channel, o.orderId)}" target="_blank" class="order-link">${o.orderId}</a>
           </td>
@@ -736,6 +745,15 @@
         display = display.substring(0, 37) + '...';
       }
       return display || '-';
+    }
+
+    function getChannelDisplayName(channel) {
+      switch(channel) {
+        case 'cafe24': return 'Cafe24';
+        case 'naver': return '스마트스토어';
+        case 'coupang': return '쿠팡';
+        default: return channel.toUpperCase();
+      }
     }
 
     function getOrderDetailUrl(channel, orderId) {
@@ -890,7 +908,7 @@
       channelChart = new Chart(document.getElementById('channelChart'), {
         type: 'doughnut',
         data: {
-          labels: ['Cafe24', 'Naver', 'Coupang'],
+          labels: ['Cafe24', '스마트스토어', '쿠팡'],
           datasets: [{
             data: [channelData.cafe24, channelData.naver, channelData.coupang],
             backgroundColor: ['#3b82f6', '#22c55e', '#f97316'],
